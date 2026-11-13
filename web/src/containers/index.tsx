@@ -2,6 +2,7 @@ import { ErrorFallback } from "../components/ErrorFallback";
 import { Loading } from "../components/Loading";
 import { useAutoProgress } from "../components/AutoProgress";
 import { Navbar } from "../components/Navbar";
+import { OverlayControls } from "../components/OverlayControls";
 import { pipe } from "../utility";
 import { withBlank } from "../utility/withBlank";
 import { withScrollRestoration } from "../utility/withScrollRestoration";
@@ -23,6 +24,7 @@ export function App() {
 
   return (
     <>
+      <OverlayControls />
       <Navbar />
       <Suspense fallback={<Loading />}>
         <ErrorBoundary FallbackComponent={ErrorFallback}>

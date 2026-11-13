@@ -5,7 +5,8 @@ import { type Id, toast } from "react-toastify";
 import useWebSocket, { ReadyState } from "react-use-websocket-lite";
 import React from "react";
 
-const AUTO_PROGRESS_URL = "ws://127.0.0.1:6754";
+const AUTO_PROGRESS_URL =
+  window.exileOverlay?.autoProgressUrl ?? "ws://127.0.0.1:6754";
 
 export function useAutoProgress() {
   const write = useSetAtom(activeEdgeAtom);

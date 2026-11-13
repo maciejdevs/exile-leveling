@@ -1,6 +1,10 @@
 {
   "name": "exile-leveling",
   "scripts": {
+    "overlay": "npm run build:overlay && electron desktop/main.cjs",
+    "build:overlay": "node scripts/prepare-overlay.mjs && npm run build -w web -- --mode desktop",
+    "package:overlay": "npm run build:overlay && node scripts/package-overlay.mjs",
+    "test:overlay": "node --test desktop/server.test.mjs",
     "dev": "node scripts/dev.mjs",
     "auto-progress": "node scripts/auto-progress.mjs",
     "test:auto-progress": "node --test scripts/auto-progress.test.mjs"
@@ -11,7 +15,9 @@
     "web"
   ],
   "devDependencies": {
+    "@electron/packager": "^20.3.0",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
+    "electron": "^45.3.2",
     "prettier": "^3.9.5",
     "ws": "^8.23.0"
   }

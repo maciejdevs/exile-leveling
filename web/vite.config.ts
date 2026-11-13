@@ -3,14 +3,16 @@ import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   base: "/exile-leveling/",
   server: {
     host: true,
   },
+  build: { outDir: mode === "desktop" ? "dist-desktop" : "dist" },
   plugins: [
     react(),
     VitePWA({
+      disable: mode === "desktop",
       registerType: "autoUpdate",
       manifest: {
         name: "Exile Leveling",
@@ -36,4 +38,4 @@ export default defineConfig({
       },
     }),
   ],
-});
+}));

@@ -9,6 +9,10 @@ lerna-debug.log*
 
 node_modules
 .npm-cache
+.electron-cache
+.overlay-smoke
+release
+dist-desktop
 dist
 dist-ssr
 *.local

@@ -1,5 +1,5 @@
 .sidebar {
-  --offset: calc(var(--navbar-height) + var(--actbar-height) + var(--size-2));
+  --offset: calc(var(--navbar-height) + var(--actbar-height) + var(--size-2) + var(--overlay-toolbar-height, 0px));
   display: flex;
   flex-direction: column;
   position: fixed;

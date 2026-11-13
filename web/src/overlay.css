@@ -1,0 +1,74 @@
+html[data-overlay] {
+  --primary: transparent;
+  --secondary: transparent;
+  --overlay-toolbar-height: 30px;
+  --on-primary: #f5f5f5;
+  background: transparent;
+  text-shadow:
+    0 1px 3px #000,
+    1px 0 2px #000,
+    -1px 0 2px #000;
+  scrollbar-width: thin;
+}
+
+html[data-overlay] body,
+html[data-overlay] #root {
+  background: transparent;
+}
+
+html[data-overlay] #root {
+  padding-top: var(--overlay-toolbar-height);
+}
+
+.overlay-toolbar {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 10;
+  height: var(--overlay-toolbar-height);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #d1d5db;
+  background: rgb(0 0 0 / 18%);
+  user-select: none;
+}
+
+.overlay-drag {
+  -webkit-app-region: drag;
+  flex: 1;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+}
+
+.overlay-toolbar button {
+  -webkit-app-region: no-drag;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.overlay-toolbar button:hover {
+  color: #4ade80;
+}
+
+.overlay-resize {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  z-index: 10;
+  padding: 3px;
+  color: #d1d5db;
+  cursor: nwse-resize;
+  touch-action: none;
+}
+
+html[data-overlay-locked="true"] {
+  scrollbar-width: none;
+}
+
+html[data-overlay-locked="true"] .overlay-toolbar {
+  background: transparent;
+  opacity: 0.65;
+}
