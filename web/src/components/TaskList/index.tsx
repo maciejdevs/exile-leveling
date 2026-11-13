@@ -1,19 +1,21 @@
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { borderListStyles, interactiveStyles } from "../../styles";
 import styles from "./styles.module.css";
 import classNames from "classnames";
 import type { WritableAtom } from "jotai";
 import { FaRegCircle, FaRegPlayCircle } from "react-icons/fa";
-import { edgeId, nextEdgeAtom } from "../../state/route";
+import { activeEdgeAtom, edgeId, nextEdgeAtom } from "../../state/route";
 
 interface TaskItemProps {
   edgeIndex: number | null;
+  zoneEdgeIndex?: number | null;
   isCompletedState?: WritableAtom<boolean, [boolean], void>;
   children?: React.ReactNode;
 }
 
 function TaskListItem({
   edgeIndex,
+  zoneEdgeIndex = edgeIndex,
   isCompletedState,
   children,
 }: TaskItemProps) {
@@ -22,10 +24,13 @@ function TaskListItem({
     : [undefined, undefined];
 
   const [nextEdge, setNextEdge] = useAtom(nextEdgeAtom(edgeIndex));
+  const [activeEdgeIndex] = useAtomValue(activeEdgeAtom);
+  const isCurrent = zoneEdgeIndex !== null && zoneEdgeIndex === activeEdgeIndex;
 
   return (
     <li
       id={edgeIndex !== null ? edgeId(edgeIndex) : undefined}
+      aria-current={isCurrent && edgeIndex !== null ? "step" : undefined}
       tabIndex={0}
       className={classNames(
         styles.listItem,
@@ -33,6 +38,8 @@ function TaskListItem({
         interactiveStyles.hoverPrimary,
         {
           [styles.completed]: isCompleted,
+          [styles.current]: isCurrent,
+          [styles.upcoming]: nextEdge === true,
         },
       )}
       onClick={() => {

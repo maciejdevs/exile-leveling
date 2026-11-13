@@ -40,6 +40,31 @@
   opacity: 0.25;
 }
 
+.listItem.current .listItemInner {
+  background-color: rgb(74 222 128 / 12%);
+  box-shadow: inset 3px 0 #4ade80;
+}
+
+.listItem.current .edgeTag,
+.listItem.current .bullet {
+  color: #4ade80;
+}
+
+.listItem.upcoming .listItemInner {
+  background-color: rgb(251 191 36 / 12%);
+  box-shadow: inset 3px 0 #fbbf24;
+}
+
+.listItem.upcoming .edgeTag,
+.listItem.upcoming .bullet {
+  color: #fbbf24;
+}
+
+.listItem.current .task,
+.listItem.upcoming .task {
+  opacity: 1;
+}
+
 .task {
   display: flex;
   flex-direction: column;

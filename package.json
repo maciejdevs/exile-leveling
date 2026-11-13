@@ -1,5 +1,10 @@
 {
   "name": "exile-leveling",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "auto-progress": "node scripts/auto-progress.mjs",
+    "test:auto-progress": "node --test scripts/auto-progress.test.mjs"
+  },
   "workspaces": [
     "common",
     "seeding",
@@ -7,6 +12,7 @@
   ],
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
-    "prettier": "^3.9.5"
+    "prettier": "^3.9.5",
+    "ws": "^8.23.0"
   }
 }

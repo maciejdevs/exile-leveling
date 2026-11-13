@@ -5,7 +5,7 @@ import { type Id, toast } from "react-toastify";
 import useWebSocket, { ReadyState } from "react-use-websocket-lite";
 import React from "react";
 
-const AUTO_PROGRESS_URL = "ws://localhost:6754";
+const AUTO_PROGRESS_URL = "ws://127.0.0.1:6754";
 
 export function useAutoProgress() {
   const write = useSetAtom(activeEdgeAtom);
@@ -23,18 +23,19 @@ export function useAutoProgress() {
   const toastId = React.useRef<Id | null>(null);
 
   useEffect(() => {
-    if (readyState == ReadyState.CONNECTING) {
+    if (readyState !== ReadyState.OPEN) {
       if (toastId.current === null || !toast.isActive(toastId.current)) {
         toastId.current = toast("");
       }
 
       toast.update(toastId.current, {
-        render: "Setup Auto-Progress",
+        render:
+          "Auto-progress offline — run npm run dev or npm run auto-progress",
         type: "info",
         onClick: () => {
-          window.open(
-            "https://github.com/HeartofPhos/exile-log-api/releases",
-            "_blank",
+          toast.info(
+            'Run npm run dev in the repo. For a custom game location, add -- --log-path "path/to/logs/LatestClient.txt".',
+            { autoClose: false },
           );
         },
         style: { cursor: "pointer" },

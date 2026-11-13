@@ -15,6 +15,7 @@ export default function RoutesContainer() {
 
   const items = useMemo(() => {
     const items: ReactNode[] = [];
+    let zoneEdgeIndex = 0;
     for (
       let sectionIndex = 0;
       sectionIndex < route.sections.length;
@@ -26,9 +27,15 @@ export default function RoutesContainer() {
       for (let stepIndex = 0; stepIndex < section.steps.length; stepIndex++) {
         const step = section.steps[stepIndex];
 
+        // Each zone includes its entry and all following steps until the next entry.
+        if (step.type === "fragment_step" && step.edgeIndex !== null) {
+          zoneEdgeIndex = step.edgeIndex;
+        }
+
         if (step.type == "fragment_step")
           taskItems.push({
             edgeIndex: step.edgeIndex,
+            zoneEdgeIndex,
             isCompletedState: routeProgressFamily(
               [sectionIndex, stepIndex].toString(),
             ),
@@ -38,6 +45,7 @@ export default function RoutesContainer() {
         if (step.type == "gem_step")
           taskItems.push({
             edgeIndex: null,
+            zoneEdgeIndex,
             isCompletedState: gemProgressFamily(step.requiredGem.id),
             children: (
               <GemReward
