@@ -16,7 +16,7 @@ import { TbHierarchy } from "react-icons/tb";
 import flattenChildren from "react-keyed-flatten-children";
 
 export function Sidebar() {
-  const [expand, setExpand] = useState(!window.exileOverlay);
+  const [expand, setExpand] = useState(false);
   const [activeTab, setActiveTab] = useState<number>(0);
 
   const sections = useSections();

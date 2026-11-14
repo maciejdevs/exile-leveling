@@ -1,9 +1,10 @@
-html[data-overlay] {
+html {
   --primary: transparent;
   --secondary: transparent;
   --overlay-toolbar-height: 30px;
   --on-primary: #f5f5f5;
   background: transparent;
+  font-family: "Segoe UI", sans-serif;
   text-shadow:
     0 1px 3px #000,
     1px 0 2px #000,
@@ -11,12 +12,12 @@ html[data-overlay] {
   scrollbar-width: thin;
 }
 
-html[data-overlay] body,
-html[data-overlay] #root {
+body,
+#root {
   background: transparent;
 }
 
-html[data-overlay] #root {
+#root {
   padding-top: var(--overlay-toolbar-height);
 }
 
@@ -50,6 +51,13 @@ html[data-overlay] #root {
 }
 
 .overlay-toolbar button:hover {
+  color: #4ade80;
+}
+
+.overlay-log-status.waiting {
+  color: #fbbf24;
+}
+.overlay-log-status.watching {
   color: #4ade80;
 }
 

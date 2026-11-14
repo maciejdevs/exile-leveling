@@ -12,7 +12,6 @@ node_modules
 .electron-cache
 .overlay-smoke
 release
-dist-desktop
 dist
 dist-ssr
 *.local

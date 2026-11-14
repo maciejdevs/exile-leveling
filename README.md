@@ -1,90 +1,91 @@
-## Getting Started
+# Exile Leveling Overlay
 
-- `npm ci`
-- `npm run seed tree -w seeding` (first run; downloads passive-tree data)
-- `npm run dev` (starts the web app and the built-in auto-progress helper)
-- Open http://localhost:5173/exile-leveling/ (or the address printed in the terminal).
+A standalone Windows overlay for Path of Exile in windowed fullscreen mode.
+The background is transparent, current-zone steps are green, and the next zone
+entry is amber. Auto-progress is always enabled.
 
-On Windows PowerShell, use `npm.cmd` instead of `npm` if script execution is disabled.
+## Run
 
-### Auto-progress
-
-No separate executable is needed. Start Path of Exile and leave `npm run dev` running.
-The helper detects the running game's installation on Windows and checks common Steam
-and standalone install locations for `logs/LatestClient.txt` (falling back to `Client.txt`).
-It prints the log path it is watching. For other locations or operating systems, pass
-the full path explicitly:
+From this folder, install dependencies once and start the app:
 
 ```powershell
-npm.cmd run dev -- --log-path "D:\Games\Path of Exile\logs\LatestClient.txt"
+npm.cmd ci
+npm.cmd start
 ```
 
-You can also set the `POE_LOG_PATH` environment variable. To run just the helper,
-use `npm run auto-progress -- --log-path "..."`; `npm run dev -w web` still runs
-just the website. The helper listens only on `127.0.0.1:6754` and sends newly appended
-area-generation entries to the app. It waits if the game/log is not available yet.
-Existing log history is skipped at startup. Stop both services with Ctrl+C.
+The app starts in the **system tray** and appears when Path of Exile is focused.
+Switching to another application hides it within the foreground polling interval
+(about 200ms). Clicking its own controls keeps it visible for editing; switching
+to any other application hides it again. It never forces PoE into focus.
 
-Progress advances when you enter the next expected area in the route. If you start
-midway through the campaign, click the circle beside your current route step first.
-The connected notification confirms the socket connection; check the terminal for
-`Watching ...` to confirm the game log was found.
+Drag the title to position it below your status icons. Drag the bottom-right
+triangle to grow **or shrink** it (minimum 300 × 220). Arrow keys on the resize
+handle adjust its size too. Position and size are remembered.
 
-Run `npm run test:auto-progress` to test the log reader and WebSocket delivery.
+- **Ctrl+Alt+I / Lock:** toggle click-through for gameplay.
+- **Ctrl+Alt+O:** toggle manual hiding while PoE is focused.
+- **Tray menu:** see log/focus status, reset the position, or quit.
+- **×:** quit.
 
-## Desktop overlay (Windows)
-
-Run `npm.cmd run overlay` to open a separate, transparent, always-on-top desktop
-app. It includes its own log reader on loopback port 6755; a browser or separate
-helper is not required, and closing a running browser helper will not affect it.
-
-The initial position is 12px from the left and 140px below the top of your primary
-display's work area, below the usual status-icon area. Drag the **Exile Leveling**
-title to adjust it for your UI scale or move it to another monitor. Drag the triangle
-at the bottom-right to resize. Position and size are remembered.
-
-- **Lock / Ctrl+Alt+I:** toggle click-through. While locked, mouse and keyboard input
-  go to the game normally; the guide keeps progressing and scrolling.
-- **Ctrl+Alt+O:** show/hide the overlay.
-- **System tray icon:** show/hide, toggle click-through, reset position, or quit.
-- **×:** quit the desktop app.
-
-Text remains opaque with a shadow for readability; the app background is transparent.
-Current-zone steps stay green and the next zone entry stays amber. Use PoE's
-windowed fullscreen mode. This is an independent OS window: it does not inject into,
-hook, modify, or send input to the game. It only reads the same game log as before.
-
-The desktop app has its own saved build, route settings, and progress, separate from
-your browser. Import your build and select your current route step on first use.
-For a custom log path, use `npm.cmd run overlay -- --log-path "D:\Games\Path of Exile\logs\LatestClient.txt"`.
-
-To create a standalone Windows app folder:
+If log discovery needs help, the only optional startup setting is a log path:
 
 ```powershell
-npm.cmd run package:overlay
+npm.cmd start -- --log-path "D:\Games\Path of Exile\logs\LatestClient.txt"
 ```
 
-Launch `release/Exile Leveling Overlay-win32-x64/Exile Leveling Overlay.exe`.
-Keep that entire folder together; you can create a shortcut to the executable.
-It does not require Node.js, a terminal, or a browser on the machine running it.
-The first desktop build downloads missing passive-tree data and the Electron runtime.
-Later builds can use those cached files. If npm skips Electron's install
-script, run `node node_modules/electron/install.js` before `npm.cmd run overlay`.
+`POE_LOG_PATH` is also supported. A green dot in the title bar confirms that the
+log is being read; hover over it to see the path. Auto-progress follows the next
+expected area in the route. Click a route entry's circle if you start mid-campaign.
 
-## Seeding
+## Commands
 
-### Passive Tree
+| Command             | Purpose                                                                          |
+| ------------------- | -------------------------------------------------------------------------------- |
+| `npm.cmd start`     | Build the renderer and run the standalone app.                                   |
+| `npm.cmd run build` | Create the standalone Windows executable folder.                                 |
+| `npm.cmd test`      | Run regression tests for logs, visibility, resizing, settings, and asset access. |
 
-- `npm run seed tree -w seeding`
+After building, launch `release/Exile Leveling Overlay-win32-x64/Exile Leveling Overlay.exe`.
+Keep that entire folder together. Running the executable requires neither Node.js
+nor a browser. The first dependency installation/build needs the Electron runtime;
+subsequent builds reuse a cached ZIP after verifying its SHA-256 checksum.
 
-### General
+There is no browser/PWA mode, separate log-helper command, local web server, or
+WebSocket port. The `web/` directory is just the Electron renderer; its name and
+upstream source layout are retained to reduce merge conflicts.
 
-- Find the list of required `dat` files in `seeding/data/index.ts`
-- Use https://github.com/HeartofPhos/exile-export to get required `.dat.json` files
-- `npm run seed data -w seeding`
+## What the downloaded tree assets are
 
-## Route
+The JSON files in `common/data/tree/` describe passive-skill-tree nodes and their
+connections for different PoE versions. The upstream seeding utility derives them
+from Grinding Gear Games' public skill-tree exports. They let the app draw the
+tree contained in an imported Path of Building build. They are not your personal
+builds, executable code, or files installed into PoE.
 
-I'm not currently taking PRs related to route changes, my intention is to keep the base route in line with current speed running strategies.
+They are **optional for the route, gem instructions, and auto-progress**. Existing
+downloaded files are kept and bundled, but starting/building the app no longer
+downloads them automatically. Without them, imported builds still provide their
+other information; unavailable passive-tree previews are skipped.
 
-Users are encourged to use the [Edit Route Tab](https://heartofphos.github.io/exile-leveling/#/edit-route) in the deployed app to update the route to their preferred playstyle.
+Maintainers who want to refresh those optional previews can use the unchanged
+upstream data utility, then rebuild:
+
+```powershell
+npm.cmd run seed -w seeding -- tree
+```
+
+## Boundaries and upstream updates
+
+The app only reads the game log. It does not inject into the client, install game
+hooks, read/write game memory, modify game files, or send game input. A small owned
+Windows helper queries foreground-window ownership and executable-path metadata
+with limited query rights. If detection fails, the overlay stays hidden.
+
+The renderer is sandboxed with Node integration disabled and an isolated preload
+bridge. Only that renderer's main frame can invoke the small allowlist of desktop
+controls. Settings are stored in `%APPDATA%\Exile Leveling Overlay`; previous desktop
+settings are migrated without reading your browser's profile.
+
+`common/` and `seeding/` retain the original upstream logic and data. See
+[the maintenance guide](docs/maintenance.md) for safe route/data updates and the
+desktop module layout.

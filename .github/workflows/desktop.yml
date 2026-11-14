@@ -1,0 +1,17 @@
+name: Desktop checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Check the packaged app
+        shell: pwsh
+        run: |
+          $result = Start-Process -FilePath '.\release\Exile Leveling Overlay-win32-x64\Exile Leveling Overlay.exe' -ArgumentList '--smoke-test' -WindowStyle Hidden -Wait -PassThru
+          if ($result.ExitCode -ne 0) { exit $result.ExitCode }

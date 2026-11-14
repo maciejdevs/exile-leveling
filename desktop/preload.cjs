@@ -1,13 +1,21 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("exileOverlay", {
-  autoProgressUrl: "ws://127.0.0.1:6755",
   getState: () => ipcRenderer.invoke("overlay:state"),
+  previousStorage: () => ipcRenderer.invoke("overlay:previous-storage"),
   toggleLock: () => ipcRenderer.invoke("overlay:toggle-lock"),
   hide: () => ipcRenderer.invoke("overlay:hide"),
   quit: () => ipcRenderer.invoke("overlay:quit"),
-  resize: (width, height) =>
-    ipcRenderer.send("overlay:resize", { width, height }),
+  beginResize: () => ipcRenderer.send("overlay:resize-begin"),
+  updateResize: () => ipcRenderer.send("overlay:resize-update"),
+  endResize: () => ipcRenderer.send("overlay:resize-end"),
+  resizeBy: (dx, dy) => ipcRenderer.send("overlay:resize-by", dx, dy),
+  onArea: (callback) => {
+    const listener = (_event, message) => callback(message);
+    ipcRenderer.on("overlay:area", listener);
+    ipcRenderer.send("overlay:renderer-ready");
+    return () => ipcRenderer.removeListener("overlay:area", listener);
+  },
   onState: (callback) => {
     const listener = (_event, state) => callback(state);
     ipcRenderer.on("overlay:state-changed", listener);
