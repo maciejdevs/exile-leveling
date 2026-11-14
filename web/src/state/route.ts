@@ -7,6 +7,7 @@ import type { RouteData } from "common";
 import { persistentAtom, transientAtomFamily } from ".";
 import { RESET } from "jotai/utils";
 import { atomEffect, observe } from "jotai-effect";
+import { resolveAreaProgress } from "../utility/area-progress";
 
 const baseRouteSelector = atom(async (get) => {
   const { initializeRouteState, parseRoute } = await import("common");
@@ -125,8 +126,7 @@ export const activeEdgeAtom = atom(
     }
 
     const edges = (await get(routeSelector)).edges;
-    const nextEdgeIndex = get(activeEdgeAtom)[0] + 1;
-    const nextAreaId = edges[nextEdgeIndex];
+    const currentEdgeIndex = get(activeEdgeAtom)[0];
 
     let messageAreaId = null;
     const matches = /Generating level \d+ area "(.*?)"/.exec(value);
@@ -134,8 +134,9 @@ export const activeEdgeAtom = atom(
       messageAreaId = matches[1];
     }
 
-    if (nextAreaId === messageAreaId) {
-      set(activeEdgeIndex, [nextEdgeIndex]);
+    if (messageAreaId !== null) {
+      const result = resolveAreaProgress(edges, currentEdgeIndex, messageAreaId);
+      if (result.reason === "advanced") set(activeEdgeIndex, [result.index]);
     }
   },
 );

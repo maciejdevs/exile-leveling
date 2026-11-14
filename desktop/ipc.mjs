@@ -1,7 +1,12 @@
 import { ipcMain } from "electron";
 import { isAppUrl } from "./assets.mjs";
 
-export function registerDesktopIpc(overlay, previousStorage, quit) {
+export function registerDesktopIpc(
+  overlay,
+  previousStorage,
+  quit,
+  logControls,
+) {
   const trusted = (event) =>
     event.sender === overlay.window.webContents &&
     event.senderFrame === overlay.window.webContents.mainFrame &&
@@ -12,6 +17,10 @@ export function registerDesktopIpc(overlay, previousStorage, quit) {
     "overlay:toggle-lock": overlay.toggleLock,
     "overlay:hide": overlay.toggleHidden,
     "overlay:quit": quit,
+    "tracking:refresh": logControls.refresh,
+    "tracking:automatic": logControls.automatic,
+    "tracking:choose": logControls.choose,
+    "tracking:reveal": logControls.reveal,
   })) {
     ipcMain.handle(channel, (event) => {
       if (!trusted(event)) throw new Error("Untrusted desktop request");

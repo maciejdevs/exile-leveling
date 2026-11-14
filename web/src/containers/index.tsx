@@ -18,6 +18,7 @@ const RoutesContainer = pipe(
 )(lazy(() => import("./Routes")));
 const BuildContainer = withBlank(lazy(() => import("./Build")));
 const EditRouteContainer = withBlank(lazy(() => import("./EditRoute")));
+const LogTrackingContainer = lazy(() => import("./LogTracking"));
 
 export function App() {
   useAutoProgress();
@@ -29,6 +30,15 @@ export function App() {
       <Suspense fallback={<Loading />}>
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <Routes>
+            <Route
+              path="/tracking"
+              element={
+                <Page
+                  title="Exile Leveling - Log tracking"
+                  component={<LogTrackingContainer />}
+                />
+              }
+            />
             <Route
               path="/"
               element={

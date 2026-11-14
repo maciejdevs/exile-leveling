@@ -34,8 +34,19 @@ npm.cmd start -- --log-path "D:\Games\Path of Exile\logs\LatestClient.txt"
 ```
 
 `POE_LOG_PATH` is also supported. A green dot in the title bar confirms that the
-log is being read; hover over it to see the path. Auto-progress follows the next
-expected area in the route. Click a route entry's circle if you start mid-campaign.
+log is being read; hover over it to see the path. Auto-progress follows the expected
+area and catches up to an unambiguous later visit when optional steps were skipped.
+It will not guess between repeated visits or move backwards automatically.
+
+Open **Menu → Log tracking** to see the selected file, file-update time, latest
+detected area, new area-event count, and the guide's current/next areas. Detection
+checks the running game, standard Steam/standalone installs, and Steam's configured
+libraries. You can retry detection, select `Client.txt` / `LatestClient.txt`, or open
+the log folder. A selected file is remembered. The system tray has these controls too.
+
+If tracking works but the guide is at a different point, use **Sync guide to this
+area** on that page. Select the correct visit explicitly for repeated areas.
+Existing history is shown for diagnosis, not replayed into progress automatically.
 
 ## Commands
 

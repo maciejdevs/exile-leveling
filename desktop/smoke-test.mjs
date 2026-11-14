@@ -88,6 +88,43 @@ export async function runSmokeTest({
       ),
     "New log entries did not advance the guide over IPC",
   );
+  await appendFile(logPath, 'Generating level 4 area "1_1_3"\n');
+  await until(
+    () =>
+      window.webContents.executeJavaScript(
+        "document.querySelector('[aria-current=step]')?.id === 'edge-3'",
+      ),
+    "Skipped route step did not catch up",
+  );
+  // Reset only the disposable guide through its own UI, then exercise the new
+  // tracking page and its explicit synchronization control.
+  await window.webContents.executeJavaScript(
+    "document.querySelector('li#edge-0 span[aria-hidden]').click(); location.hash = '#/tracking';",
+  );
+  await until(
+    () =>
+      window.webContents.executeJavaScript(
+        "document.querySelector('h1')?.textContent === 'Log tracking'",
+      ),
+    "Log tracking menu page did not render",
+  );
+  const tracking = await window.webContents.executeJavaScript(
+    "window.exileOverlay.refreshLogs()",
+  );
+  assert.equal(tracking.state, "watching");
+  assert.equal(tracking.path, logPath);
+  assert.equal(tracking.lastAreaId, "1_1_3");
+  assert.equal(tracking.areaEvents, 2);
+  await window.webContents.executeJavaScript(
+    "Array.from(document.querySelectorAll('button')).find(button => button.textContent === 'Sync guide to this area').click()",
+  );
+  await until(
+    () =>
+      window.webContents.executeJavaScript(
+        "document.querySelector('[aria-current=step]')?.id === 'edge-3'",
+      ),
+    "Guide synchronization did not work",
+  );
   const style = await window.webContents.executeJavaScript(
     "getComputedStyle(document.documentElement).backgroundColor",
   );
@@ -100,6 +137,9 @@ export async function runSmokeTest({
     grew: true,
     shrank: true,
     logProgressOverIpc: true,
+    skippedStepCatchUp: true,
+    logTrackingMenu: true,
+    explicitGuideSync: true,
     nativeFocus: nativeSnapshot().foreground,
     alwaysOnTop: true,
     visible: window.isVisible(),

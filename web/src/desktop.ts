@@ -1,13 +1,30 @@
+export interface LogStatus {
+  state: "waiting" | "watching";
+  message: string;
+  path: string | null;
+  mode?: "auto" | "manual";
+  lastArea?: string | null;
+  lastAreaId?: string | null;
+  lastAreaAt?: number | null;
+  areaEvents?: number;
+  fileSize?: number | null;
+  modifiedAt?: number | null;
+}
+
 export interface DesktopState {
   locked: boolean;
   gameActive: boolean;
   manuallyHidden: boolean;
   focusError: string | null;
-  log: { state: "waiting" | "watching"; message: string; path: string | null };
+  log: LogStatus;
 }
 
 export interface DesktopApi {
   getState(): Promise<DesktopState>;
+  refreshLogs(): Promise<LogStatus>;
+  detectLogs(): Promise<LogStatus>;
+  chooseLog(): Promise<LogStatus>;
+  revealLog(): Promise<void>;
   previousStorage(): Promise<Record<string, string>>;
   toggleLock(): Promise<DesktopState>;
   hide(): Promise<void>;

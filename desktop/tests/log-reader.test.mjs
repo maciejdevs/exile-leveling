@@ -132,9 +132,45 @@ test(
     await appendFile(path, `${line("next")}\n`);
     while (!areas.length) await delay(10);
     assert.deepEqual(areas, [message("next")]);
+    assert.equal(monitor.status().lastAreaId, "next");
+    assert.equal(monitor.status().areaEvents, 1);
+    assert.equal((await monitor.refresh()).lastAreaId, "next");
+    assert.deepEqual(
+      areas,
+      [message("next")],
+      "Refreshing must not replay events",
+    );
     await monitor.close();
     await appendFile(path, `${line("after-close")}\n`);
     await delay(30);
     assert.deepEqual(areas, [message("next")]);
+  },
+);
+
+test(
+  "switches tracking files without replaying history",
+  { timeout: 5000 },
+  async (t) => {
+    const { path, directory } = await fixture(t);
+    const second = join(directory, "Client.txt");
+    await writeFile(path, `${line("first-history")}\n`);
+    await writeFile(second, `${line("second-history")}\n`);
+    const areas = [];
+    const monitor = startLogMonitor({
+      logPath: path,
+      interval: 10,
+      onArea: (value) => areas.push(value),
+      onStatus: () => {},
+    });
+    t.after(() => monitor.close());
+    while (!monitor.status()) await delay(10);
+    assert.equal(monitor.status().lastAreaId, "first-history");
+    const selected = await monitor.selectPath(second);
+    assert.equal(selected.mode, "manual");
+    assert.equal(selected.lastAreaId, "second-history");
+    assert.deepEqual(areas, []);
+    await appendFile(second, `${line("live")}\n`);
+    while (!areas.length) await delay(10);
+    assert.deepEqual(areas, [message("live")]);
   },
 );

@@ -2,6 +2,10 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("exileOverlay", {
   getState: () => ipcRenderer.invoke("overlay:state"),
+  refreshLogs: () => ipcRenderer.invoke("tracking:refresh"),
+  detectLogs: () => ipcRenderer.invoke("tracking:automatic"),
+  chooseLog: () => ipcRenderer.invoke("tracking:choose"),
+  revealLog: () => ipcRenderer.invoke("tracking:reveal"),
   previousStorage: () => ipcRenderer.invoke("overlay:previous-storage"),
   toggleLock: () => ipcRenderer.invoke("overlay:toggle-lock"),
   hide: () => ipcRenderer.invoke("overlay:hide"),

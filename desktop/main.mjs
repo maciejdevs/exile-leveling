@@ -15,6 +15,9 @@ import { parseArgs } from "node:util";
 import { APP_URL, createAssetHandler, isAppUrl } from "./assets.mjs";
 import { registerDesktopIpc } from "./ipc.mjs";
 import { startLogMonitor } from "./log-reader.mjs";
+import { gameInstallDirectories } from "./log-discovery.mjs";
+import { createLogControls } from "./log-controls.mjs";
+import { readLogPreference } from "./log-settings.mjs";
 import { createOverlayWindow } from "./overlay-window.mjs";
 import { readPreviousDesktopStorage } from "./storage-migration.mjs";
 import { startFocusMonitor } from "./windows-focus.mjs";
@@ -43,6 +46,7 @@ protocol.registerSchemesAsPrivileged([
 
 let overlay;
 let logs;
+let logControls;
 let focus;
 let tray;
 let nativeSnapshot;
@@ -63,6 +67,34 @@ function updateTray() {
     Menu.buildFromTemplate([
       { label: status, enabled: false },
       { label: state.log.message, enabled: false },
+      {
+        label: "Log tracking",
+        submenu: [
+          { label: state.log.path || "No log file detected", enabled: false },
+          {
+            label: "Detect automatically",
+            click: () => void logControls.automatic().catch(console.error),
+          },
+          {
+            label: "Choose log file...",
+            click: () =>
+              void logControls
+                .choose()
+                .catch((error) =>
+                  dialog.showErrorBox("Log tracking", error.message),
+                ),
+          },
+          {
+            label: "Check again",
+            click: () => void logControls.refresh().catch(console.error),
+          },
+          {
+            label: "Open log folder",
+            enabled: !!state.log.path,
+            click: () => logControls.reveal(),
+          },
+        ],
+      },
       { type: "separator" },
       {
         label: "Hide while playing (Ctrl+Alt+O)",
@@ -117,7 +149,6 @@ async function start() {
       : readPreviousDesktopStorage(protocol);
     return migration;
   };
-  registerDesktopIpc(overlay, previousStorage, () => app.quit());
   window.webContents.session.setPermissionRequestHandler(
     (contents, permission, callback) =>
       callback(
@@ -149,7 +180,10 @@ async function start() {
     }
   });
 
-  let logPath = values["log-path"] || process.env.POE_LOG_PATH;
+  const preferencesFile = join(app.getPath("userData"), "log-tracking.json");
+  const preference = await readLogPreference(preferencesFile);
+  let logPath =
+    values["log-path"] || process.env.POE_LOG_PATH || preference.path;
   if (smokeTest) {
     await mkdir(smokeDirectory, { recursive: true });
     logPath = join(smokeDirectory, "LatestClient.txt");
@@ -157,10 +191,12 @@ async function start() {
   }
   logs = startLogMonitor({
     logPath,
-    directories: () => gameDirectories,
+    directories: () => gameInstallDirectories(gameDirectories),
     onArea: overlay.sendArea,
     onStatus: overlay.setLogStatus,
   });
+  logControls = createLogControls({ monitor: logs, window, preferencesFile });
+  registerDesktopIpc(overlay, previousStorage, () => app.quit(), logControls);
   focus = await startFocusMonitor({
     onChange(snapshot) {
       nativeSnapshot = snapshot;

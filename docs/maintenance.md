@@ -60,6 +60,11 @@ want the refreshed default, reset the custom route in Edit Route after updating.
 - `log-reader.mjs`: read-only log discovery/tailing; bounded reads and line sizes,
   no startup replay, partial UTF-8 buffering, truncation/rotation handling, and
   sanitized area messages. It keeps running while the overlay is hidden.
+- `log-discovery.mjs`: standard install directories and configured Steam libraries,
+  with the running game's directory first. No recursive drive scans.
+- `log-controls.mjs` / `log-settings.mjs`: validated native file selection, saved
+  automatic/manual preference, explicit refresh, and folder reveal. The renderer
+  can request these operations but cannot supply arbitrary filesystem paths.
 - `preload.cjs` / `ipc.mjs`: explicit IPC methods, main-frame/origin checks, and
   subscription cleanup. No generic Electron, filesystem, or shell API is exposed.
 - `assets.mjs`: serves bundled files through the private `exile://app/` protocol
@@ -77,6 +82,12 @@ want the refreshed default, reset the custom route in Edit Route after updating.
 The focus rules allow the overlay itself to receive focus after PoE, so controls
 and dragging remain usable. Focusing a different application clears that session.
 Manually hiding the overlay never causes it to appear over another application.
+
+The Log tracking page compares the latest sanitized area in the file with the
+guide's current/next areas. Historical entries are diagnostics only. New area
+events follow the expected edge or a unique later visit; repeated later visits
+require an explicit choice. This recovery policy lives in the renderer's tested
+`utility/area-progress.ts`, leaving upstream `common/` logic unchanged.
 
 ## Validation
 

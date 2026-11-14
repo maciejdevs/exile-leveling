@@ -8,6 +8,7 @@ import React, { useEffect, useState } from "react";
 import {
   FaBars,
   FaGithub,
+  FaFileAlt,
   FaMap,
   FaRegClipboard,
   FaTools,
@@ -117,6 +118,15 @@ export function Navbar({}: NavbarProps) {
               icon={<FaUndoAlt className={classNames("inlineIcon")} />}
               onClick={() => {
                 reset();
+                setNavExpand(false);
+              }}
+            />
+            <NavbarItem
+              label="Log tracking"
+              expand={navExpand}
+              icon={<FaFileAlt className={classNames("inlineIcon")} />}
+              onClick={() => {
+                navigate("/tracking");
                 setNavExpand(false);
               }}
             />
