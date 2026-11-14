@@ -65,7 +65,7 @@ body,
   padding: 5px;
 }
 
-.overlay-toolbar button:hover {
+html:not([data-overlay-locked="true"]) .overlay-toolbar button:hover {
   color: #4ade80;
 }
 
@@ -94,6 +94,11 @@ html[data-overlay-locked="true"] {
 
 html[data-overlay-locked="true"] .app-scroll {
   scrollbar-width: none;
+}
+
+html[data-overlay-locked="true"] .app-scroll,
+html[data-overlay-locked="true"] .app-scroll * {
+  pointer-events: none;
 }
 
 html[data-overlay-locked="true"] .overlay-toolbar,

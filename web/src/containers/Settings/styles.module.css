@@ -47,6 +47,6 @@
   opacity: 0.45;
   cursor: default;
 }
-.buttons button:hover:not(:disabled) {
+:global(html:not([data-overlay-locked="true"])) .buttons button:hover:not(:disabled) {
   border-color: #4ade80;
 }

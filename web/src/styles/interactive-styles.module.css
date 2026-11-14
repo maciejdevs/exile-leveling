@@ -1,17 +1,17 @@
 @media (hover: hover) {
-  .hoverPrimary:hover {
+  :global(html:not([data-overlay-locked="true"])) .hoverPrimary:hover {
     background-color: var(--highlight-primary);
   }
 
-  .hoverSecondary:hover {
+  :global(html:not([data-overlay-locked="true"])) .hoverSecondary:hover {
     background-color: var(--highlight-secondary);
   }
 }
 
-.activePrimary:active {
+:global(html:not([data-overlay-locked="true"])) .activePrimary:active {
   background-color: var(--highlight-primary);
 }
 
-.activeSecondary:active {
+:global(html:not([data-overlay-locked="true"])) .activeSecondary:active {
   background-color: var(--highlight-secondary);
 }
