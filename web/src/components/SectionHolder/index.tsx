@@ -33,8 +33,8 @@ export function SectionHolder({ name, items }: SectionHolderProps) {
 
   const icon = collapsed ? <FiChevronDown /> : <FiChevronUp />;
   return (
-    <div id={sectionId}>
-      <div className={classNames(styles.sectionbar)}>
+    <div id={sectionId} data-route-section>
+      <div className={classNames(styles.sectionbar)} data-route-header>
         <button
           aria-label={name}
           className={classNames(styles.header, styles.sectionbarHeader)}

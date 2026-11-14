@@ -10,15 +10,30 @@ html {
     1px 0 2px #000,
     -1px 0 2px #000;
   scrollbar-width: thin;
+  height: 100%;
+  overflow: hidden;
 }
 
 body,
 #root {
   background: transparent;
+  height: 100%;
+  overflow: hidden;
 }
 
 #root {
-  padding-top: var(--overlay-toolbar-height);
+  padding: 0;
+  min-height: 0;
+}
+
+.app-scroll {
+  position: absolute;
+  inset: var(--overlay-toolbar-height) 0 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  padding-inline: var(--size-2);
+  padding-bottom: var(--size-2);
 }
 
 .overlay-toolbar {
@@ -73,10 +88,15 @@ body,
 }
 
 html[data-overlay-locked="true"] {
+  --overlay-toolbar-height: 0px;
+  --navbar-height: 0px;
+}
+
+html[data-overlay-locked="true"] .app-scroll {
   scrollbar-width: none;
 }
 
-html[data-overlay-locked="true"] .overlay-toolbar {
-  background: transparent;
-  opacity: 0.65;
+html[data-overlay-locked="true"] .overlay-toolbar,
+html[data-overlay-locked="true"] [data-overlay-navigation] {
+  display: none;
 }

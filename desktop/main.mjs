@@ -21,6 +21,7 @@ import { readLogPreference } from "./log-settings.mjs";
 import { createOverlayWindow } from "./overlay-window.mjs";
 import { readPreviousDesktopStorage } from "./storage-migration.mjs";
 import { startFocusMonitor } from "./windows-focus.mjs";
+import { createShortcutController, shortcutLabel } from "./shortcuts.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const smokeTest = process.argv.includes("--smoke-test");
@@ -48,6 +49,7 @@ let overlay;
 let logs;
 let logControls;
 let focus;
+let shortcuts;
 let tray;
 let nativeSnapshot;
 let gameDirectories = [];
@@ -67,6 +69,9 @@ function updateTray() {
     Menu.buildFromTemplate([
       { label: status, enabled: false },
       { label: state.log.message, enabled: false },
+      ...(state.shortcutError
+        ? [{ label: state.shortcutError, enabled: false }]
+        : []),
       {
         label: "Log tracking",
         submenu: [
@@ -103,7 +108,7 @@ function updateTray() {
         click: overlay.toggleHidden,
       },
       {
-        label: "Click through to game (Ctrl+Alt+I)",
+        label: `Click through to game (${shortcutLabel(state.clickThroughShortcut)})`,
         type: "checkbox",
         checked: state.locked,
         click: overlay.toggleLock,
@@ -196,18 +201,37 @@ async function start() {
     onStatus: overlay.setLogStatus,
   });
   logControls = createLogControls({ monitor: logs, window, preferencesFile });
-  registerDesktopIpc(overlay, previousStorage, () => app.quit(), logControls);
+  shortcuts = await createShortcutController({
+    file: join(app.getPath("userData"), "shortcuts.json"),
+    register: smokeTest
+      ? () => true
+      : (key, callback) => globalShortcut.register(key, callback),
+    unregister: smokeTest ? () => {} : (key) => globalShortcut.unregister(key),
+    toggleLock: overlay.toggleLock,
+    toggleHidden: overlay.toggleHidden,
+    onChange: overlay.setShortcutStatus,
+  });
+  overlay.setShortcutStatus(shortcuts.state());
+  registerDesktopIpc(
+    overlay,
+    previousStorage,
+    () => app.quit(),
+    logControls,
+    shortcuts,
+  );
   focus = await startFocusMonitor({
     onChange(snapshot) {
       nativeSnapshot = snapshot;
       gameDirectories = snapshot.directories;
       overlay.setForeground(snapshot.foreground);
+      shortcuts.setActive(overlay.state().gameActive);
     },
     onError(message) {
       nativeSnapshot = undefined;
       gameDirectories = [];
       console.warn(message);
       overlay.setFocusError(message);
+      shortcuts.setActive(false);
     },
   });
   if (!smokeTest) {
@@ -217,13 +241,6 @@ async function start() {
     tray.on("double-click", overlay.toggleHidden);
     overlay.onState(updateTray);
     updateTray();
-    for (const [key, callback] of [
-      ["CommandOrControl+Alt+O", overlay.toggleHidden],
-      ["CommandOrControl+Alt+I", overlay.toggleLock],
-    ]) {
-      if (!globalShortcut.register(key, callback))
-        console.warn(`Shortcut unavailable: ${key}; use the tray menu.`);
-    }
   }
   app.on("second-instance", updateTray); // Never force the overlay over another app.
   await window.loadURL(APP_URL);
@@ -247,6 +264,7 @@ app.on("before-quit", (event) => {
   quitting = true;
   event.preventDefault();
   globalShortcut.unregisterAll();
+  shortcuts?.close();
   tray?.destroy();
   focus?.close();
   Promise.allSettled([logs?.close(), overlay?.close()]).then(() =>

@@ -2,6 +2,8 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("exileOverlay", {
   getState: () => ipcRenderer.invoke("overlay:state"),
+  saveShortcut: (value) => ipcRenderer.invoke("settings:shortcut", value),
+  recordShortcut: (recording) => ipcRenderer.invoke("settings:record-shortcut", recording),
   refreshLogs: () => ipcRenderer.invoke("tracking:refresh"),
   detectLogs: () => ipcRenderer.invoke("tracking:automatic"),
   chooseLog: () => ipcRenderer.invoke("tracking:choose"),

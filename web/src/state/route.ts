@@ -8,6 +8,7 @@ import { persistentAtom, transientAtomFamily } from ".";
 import { RESET } from "jotai/utils";
 import { atomEffect, observe } from "jotai-effect";
 import { resolveAreaProgress } from "../utility/area-progress";
+import { scrollToRouteEntry } from "../utility/route-scroll";
 
 const baseRouteSelector = atom(async (get) => {
   const { initializeRouteState, parseRoute } = await import("common");
@@ -135,7 +136,11 @@ export const activeEdgeAtom = atom(
     }
 
     if (messageAreaId !== null) {
-      const result = resolveAreaProgress(edges, currentEdgeIndex, messageAreaId);
+      const result = resolveAreaProgress(
+        edges,
+        currentEdgeIndex,
+        messageAreaId,
+      );
       if (result.reason === "advanced") set(activeEdgeIndex, [result.index]);
     }
   },
@@ -163,11 +168,7 @@ export const scrollToActiveEdgeEffect = atomEffect((get, set) => {
 
   if (element) {
     requestAnimationFrame(() => {
-      element.scrollIntoView({
-        behavior: behavior,
-        block: "start",
-        inline: "nearest",
-      });
+      scrollToRouteEntry(element, behavior);
     });
 
     set(scrollBehaviour, null);

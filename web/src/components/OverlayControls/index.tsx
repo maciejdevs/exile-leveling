@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { desktop, type DesktopState } from "../../desktop";
+import { shortcutLabel } from "../../utility/shortcut";
+import { scrollToRouteEntry } from "../../utility/route-scroll";
 
 export function OverlayControls() {
   const [state, setState] = useState<DesktopState>({
@@ -15,8 +17,17 @@ export function OverlayControls() {
   });
   useEffect(() => {
     const update = (value: DesktopState) => {
+      const changed =
+        document.documentElement.dataset.overlayLocked !== String(value.locked);
       setState(value);
       document.documentElement.dataset.overlayLocked = String(value.locked);
+      if (changed)
+        requestAnimationFrame(() => {
+          const current = document.querySelector<HTMLElement>(
+            '[aria-current="step"]',
+          );
+          if (current) scrollToRouteEntry(current, "instant");
+        });
     };
     const unsubscribe = desktop.onState(update);
     void desktop.getState().then(update);
@@ -41,10 +52,10 @@ export function OverlayControls() {
           ●
         </span>
         <button
-          title="Toggle click-through (Ctrl+Alt+I)"
+          title={`Toggle click-through (${shortcutLabel(state.clickThroughShortcut)})`}
           onClick={() => void desktop.toggleLock()}
         >
-          {state.locked ? "Locked · Ctrl+Alt+I" : "Lock"}
+          {state.locked ? "Locked" : "Lock"}
         </button>
         <button
           title="Hide overlay (Ctrl+Alt+O to show while PoE is focused)"

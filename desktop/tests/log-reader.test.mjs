@@ -126,7 +126,10 @@ test(
     t.after(() => monitor.close());
     while (!statuses.length) await delay(10);
     assert.equal(statuses[0].state, "waiting");
-    await writeFile(path, `${line("old")}\n`);
+    // Publish history atomically: a write after an empty file is first opened
+    // would correctly count as a new live event rather than startup history.
+    await writeFile(`${path}.ready`, `${line("old")}\n`);
+    await rename(`${path}.ready`, path);
     while (!statuses.some((value) => value.state === "watching"))
       await delay(10);
     await appendFile(path, `${line("next")}\n`);

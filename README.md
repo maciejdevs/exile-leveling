@@ -22,10 +22,16 @@ Drag the title to position it below your status icons. Drag the bottom-right
 triangle to grow **or shrink** it (minimum 300 × 220). Arrow keys on the resize
 handle adjust its size too. Position and size are remembered.
 
-- **Ctrl+Alt+I / Lock:** toggle click-through for gameplay.
+- **Backtick (`) / Lock:** toggle click-through for gameplay (default).
+- **Menu → Settings:** record and save a different click-through shortcut.
 - **Ctrl+Alt+O:** toggle manual hiding while PoE is focused.
 - **Tray menu:** see log/focus status, reset the position, or quit.
 - **×:** quit.
+
+Click-through mode hides the top controls and scrollbar, leaving the guide and
+area highlights visible. Press your saved shortcut again to restore the clickable
+interface. Shortcuts are released while recording and when another app is focused.
+The content scrollbar starts below the top bar when controls are visible.
 
 If log discovery needs help, the only optional startup setting is a log path:
 

@@ -6,7 +6,7 @@
 .listItem {
   display: flex;
   width: 100%;
-  scroll-margin: calc(var(--navbar-height) * 2 + var(--overlay-toolbar-height, 0px));
+  scroll-margin: calc(var(--navbar-height) * 2);
 }
 
 .edgeTag {

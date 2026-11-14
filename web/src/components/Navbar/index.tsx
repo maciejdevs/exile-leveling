@@ -65,6 +65,7 @@ export function Navbar({}: NavbarProps) {
 
   return (
     <div
+      data-overlay-navigation
       className={classNames(styles.navbar, {
         [styles.expand]: navExpand,
       })}
@@ -127,6 +128,15 @@ export function Navbar({}: NavbarProps) {
               icon={<FaFileAlt className={classNames("inlineIcon")} />}
               onClick={() => {
                 navigate("/tracking");
+                setNavExpand(false);
+              }}
+            />
+            <NavbarItem
+              label="Settings"
+              expand={navExpand}
+              icon={<FaTools className={classNames("inlineIcon")} />}
+              onClick={() => {
+                navigate("/settings");
                 setNavExpand(false);
               }}
             />

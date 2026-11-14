@@ -19,6 +19,7 @@ const RoutesContainer = pipe(
 const BuildContainer = withBlank(lazy(() => import("./Build")));
 const EditRouteContainer = withBlank(lazy(() => import("./EditRoute")));
 const LogTrackingContainer = lazy(() => import("./LogTracking"));
+const SettingsContainer = lazy(() => import("./Settings"));
 
 export function App() {
   useAutoProgress();
@@ -26,55 +27,69 @@ export function App() {
   return (
     <>
       <OverlayControls />
-      <Navbar />
-      <Suspense fallback={<Loading />}>
-        <ErrorBoundary FallbackComponent={ErrorFallback}>
-          <Routes>
-            <Route
-              path="/tracking"
-              element={
-                <Page
-                  title="Exile Leveling - Log tracking"
-                  component={<LogTrackingContainer />}
-                />
-              }
-            />
-            <Route
-              path="/"
-              element={
-                <Page title="Exile Leveling" component={<RoutesContainer />} />
-              }
-            />
-            <Route
-              path="/build"
-              element={
-                <Page
-                  title="Exile Leveling - Build"
-                  component={<BuildContainer />}
-                />
-              }
-            />
-            <Route
-              path="/edit-route"
-              element={
-                <Page
-                  title="Exile Leveling - Edit Route"
-                  component={<EditRouteContainer />}
-                />
-              }
-            />
-          </Routes>
-        </ErrorBoundary>
-      </Suspense>
-      <ToastContainer
-        position="bottom-right"
-        autoClose={2000}
-        closeOnClick={true}
-        theme={"dark"}
-        pauseOnFocusLoss={false}
-        pauseOnHover={false}
-        newestOnTop={true}
-      />
+      <div id="app-scroll" className="app-scroll">
+        <Navbar />
+        <Suspense fallback={<Loading />}>
+          <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <Routes>
+              <Route
+                path="/settings"
+                element={
+                  <Page
+                    title="Exile Leveling - Settings"
+                    component={<SettingsContainer />}
+                  />
+                }
+              />
+              <Route
+                path="/tracking"
+                element={
+                  <Page
+                    title="Exile Leveling - Log tracking"
+                    component={<LogTrackingContainer />}
+                  />
+                }
+              />
+              <Route
+                path="/"
+                element={
+                  <Page
+                    title="Exile Leveling"
+                    component={<RoutesContainer />}
+                  />
+                }
+              />
+              <Route
+                path="/build"
+                element={
+                  <Page
+                    title="Exile Leveling - Build"
+                    component={<BuildContainer />}
+                  />
+                }
+              />
+              <Route
+                path="/edit-route"
+                element={
+                  <Page
+                    title="Exile Leveling - Edit Route"
+                    component={<EditRouteContainer />}
+                  />
+                }
+              />
+            </Routes>
+          </ErrorBoundary>
+        </Suspense>
+        <ToastContainer
+          position="bottom-right"
+          autoClose={2000}
+          closeOnClick={true}
+          theme={"dark"}
+          pauseOnFocusLoss={false}
+          pauseOnHover={false}
+          newestOnTop={true}
+        />
+      </div>
     </>
   );
 }

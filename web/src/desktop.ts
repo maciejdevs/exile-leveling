@@ -17,10 +17,15 @@ export interface DesktopState {
   manuallyHidden: boolean;
   focusError: string | null;
   log: LogStatus;
+  clickThroughShortcut?: string;
+  shortcutRecording?: boolean;
+  shortcutError?: string | null;
 }
 
 export interface DesktopApi {
   getState(): Promise<DesktopState>;
+  saveShortcut(value: string): Promise<DesktopState>;
+  recordShortcut(recording: boolean): Promise<DesktopState>;
   refreshLogs(): Promise<LogStatus>;
   detectLogs(): Promise<LogStatus>;
   chooseLog(): Promise<LogStatus>;

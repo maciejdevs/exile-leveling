@@ -6,6 +6,7 @@ export function registerDesktopIpc(
   previousStorage,
   quit,
   logControls,
+  shortcuts,
 ) {
   const trusted = (event) =>
     event.sender === overlay.window.webContents &&
@@ -27,6 +28,16 @@ export function registerDesktopIpc(
       return callback();
     });
   }
+  ipcMain.handle("settings:shortcut", async (event, value) => {
+    if (!trusted(event)) throw new Error("Untrusted desktop request");
+    await shortcuts.save(value);
+    return overlay.state();
+  });
+  ipcMain.handle("settings:record-shortcut", (event, value) => {
+    if (!trusted(event)) throw new Error("Untrusted desktop request");
+    shortcuts.record(value);
+    return overlay.state();
+  });
   for (const [channel, callback] of Object.entries({
     "overlay:renderer-ready": overlay.replayLatestArea,
     "overlay:resize-begin": () => {

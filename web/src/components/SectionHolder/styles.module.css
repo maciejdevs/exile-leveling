@@ -3,7 +3,7 @@
   flex-direction: column;
   position: sticky;
   background-color: var(--primary);
-  top: calc(var(--navbar-height) + var(--overlay-toolbar-height, 0px));
+  top: var(--navbar-height);
   z-index: 1;
 }
 

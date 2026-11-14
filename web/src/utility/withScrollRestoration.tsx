@@ -15,16 +15,18 @@ export function withScrollRestoration<P extends {}>(
     );
 
     useEffect(() => {
-      window.scrollTo(0, scrollOffset);
+      const viewport = document.getElementById("app-scroll");
+      if (!viewport) return;
+      viewport.scrollTo(0, scrollOffset);
 
       function handleScroll() {
-        setScrollOffset(window.scrollY);
+        setScrollOffset(viewport!.scrollTop);
       }
 
-      window.addEventListener("scroll", handleScroll);
+      viewport.addEventListener("scroll", handleScroll);
 
       return () => {
-        window.removeEventListener("scroll", handleScroll);
+        viewport.removeEventListener("scroll", handleScroll);
       };
     }, []);
 

@@ -65,6 +65,9 @@ export async function createOverlayWindow({
       message: "Waiting for the PoE game log",
       path: null,
     },
+    clickThroughShortcut: "",
+    shortcutRecording: false,
+    shortcutError: null,
   };
   let ready = false;
   let lastArea;
@@ -131,6 +134,10 @@ export async function createOverlayWindow({
     },
     setLogStatus(status) {
       state.log = status;
+      publish();
+    },
+    setShortcutStatus(status) {
+      Object.assign(state, status);
       publish();
     },
     sendArea(message) {
