@@ -106,6 +106,13 @@ export async function runSmokeTest({
     () => overlay.state().log.state === "watching",
     "Log monitor did not start",
   );
+  assert.equal(
+    await window.webContents.executeJavaScript(
+      "!!document.querySelector('.route-detour-border')",
+    ),
+    false,
+    "Historical startup areas must not trigger a warning",
+  );
   await appendFile(logPath, 'Generating level 1 area "1_1_town"\n');
   await until(
     () =>
@@ -122,14 +129,115 @@ export async function runSmokeTest({
       ),
     "Minimal mode did not activate before the area change",
   );
-  await appendFile(logPath, 'Generating level 4 area "1_1_3"\n');
+  let enteredAreas = 1;
+  async function enter(area) {
+    await appendFile(logPath, `Generating level 4 area "${area}"\n`);
+    enteredAreas++;
+    await until(
+      () => overlay.state().log.areaEvents === enteredAreas,
+      "Log entry was not received",
+    );
+  }
+  const border = (shown) =>
+    until(
+      () =>
+        window.webContents.executeJavaScript(
+          `!!document.querySelector('.route-detour-border') === ${shown}`,
+        ),
+      shown ? "Detour border did not appear" : "Detour border did not clear",
+    );
+  const current = (id) =>
+    until(
+      () =>
+        window.webContents.executeJavaScript(
+          `document.querySelector('[aria-current=step]')?.id === ${JSON.stringify(id)}`,
+        ),
+      `Guide did not reach ${id}`,
+    );
+  const guideSnapshot = () =>
+    window.webContents.executeJavaScript(`({
+    cursor: document.querySelector('[aria-current=step]')?.id,
+    scrollTop: document.getElementById('app-scroll').scrollTop,
+    highlights: Array.from(document.querySelectorAll('li')).map((row, index) => ({ index, color: getComputedStyle(row.firstElementChild || row).backgroundColor })).filter(row => !['transparent', 'rgba(0, 0, 0, 0)'].includes(row.color))
+  })`);
+  await delay(100); // Let the mode-change scroll alignment settle.
+  const frozen = await guideSnapshot();
+  await enter("1_1_3"); // Wrong future zone: Coast is awaited, not Mud Flats.
+  await border(true);
+  assert.deepEqual(
+    await guideSnapshot(),
+    frozen,
+    "A detour must preserve cursor, green/amber highlights, and scroll",
+  );
+  const warningStyle = await window.webContents.executeJavaScript(`(() => {
+    const border = document.querySelector('.route-detour-border');
+    const style = getComputedStyle(border);
+    return { pointerEvents: style.pointerEvents, width: style.borderTopWidth, color: style.borderTopColor };
+  })()`);
+  assert.deepEqual(warningStyle, {
+    pointerEvents: "none",
+    width: "2px",
+    color: "rgb(239, 68, 68)",
+  });
+  overlay.sendArea("not a valid area message");
+  await delay(100);
+  await border(true);
+  assert.deepEqual(
+    await guideSnapshot(),
+    frozen,
+    "Invalid messages must not alter an existing detour warning",
+  );
+  overlay.setForeground("other");
+  await border(true);
+  overlay.setForeground(nativeSnapshot().foreground);
+  overlay.toggleLock();
+  await until(
+    () =>
+      window.webContents.executeJavaScript(
+        "getComputedStyle(document.querySelector('.overlay-toolbar')).display !== 'none'",
+      ),
+    "Normal view did not return during detour",
+  );
+  await border(true);
+  overlay.toggleLock();
+  await until(
+    () =>
+      window.webContents.executeJavaScript(
+        "getComputedStyle(document.querySelector('.overlay-toolbar')).display === 'none'",
+      ),
+    "Minimal view did not return during detour",
+  );
+  await border(true);
+  await writeFile(
+    join(directory, "detour.png"),
+    (await window.webContents.capturePage()).toPNG(),
+  );
+  await enter("1_1_town"); // Return to the current guide area, without advancing.
+  await border(false);
+  await current("edge-1");
+  await enter("1_1_3");
+  await border(true);
+  await enter("1_1_2"); // Enter the awaited Coast directly from a wrong turn.
+  await current("edge-2");
+  await border(false);
+  await enter("1_1_town"); // Unplanned selling trip from the Coast.
+  await border(true);
+  await current("edge-2");
+  await enter("1_1_2"); // Coming back clears the warning, not the next step.
+  await border(false);
+  await current("edge-2");
+  await enter("1_1_4_1"); // Another unique later area must not be a shortcut.
+  await border(true);
+  await current("edge-2");
+  await enter("1_1_3");
   await until(
     () =>
       window.webContents.executeJavaScript(
         "document.querySelector('[aria-current=step]')?.id === 'edge-3'",
       ),
-    "Skipped route step did not catch up",
+    "The expected next zone did not advance by one step",
   );
+  await border(false);
   const entryIsBelowHeaders = () =>
     window.webContents.executeJavaScript(`(() => {
     const entry = document.querySelector('[aria-current="step"]');
@@ -174,8 +282,7 @@ export async function runSmokeTest({
       ),
     "Normal mode was not restored after the clipping check",
   );
-  // Reset only the disposable guide through its own UI, then exercise the new
-  // tracking page and its explicit synchronization control.
+  // Explicit manual sync remains an override and clears a resolved mismatch.
   await window.webContents.executeJavaScript(
     "document.querySelector('li#edge-0 span[aria-hidden]').click(); location.hash = '#/tracking';",
   );
@@ -192,7 +299,8 @@ export async function runSmokeTest({
   assert.equal(tracking.state, "watching");
   assert.equal(tracking.path, logPath);
   assert.equal(tracking.lastAreaId, "1_1_3");
-  assert.equal(tracking.areaEvents, 2);
+  assert.equal(tracking.areaEvents, enteredAreas);
+  await border(true);
   await window.webContents.executeJavaScript(
     "Array.from(document.querySelectorAll('button')).find(button => button.textContent === 'Sync guide to this area').click()",
   );
@@ -203,6 +311,7 @@ export async function runSmokeTest({
       ),
     "Guide synchronization did not work",
   );
+  await border(false);
   const style = await window.webContents.executeJavaScript(
     "getComputedStyle(document.documentElement).backgroundColor",
   );
@@ -264,7 +373,11 @@ export async function runSmokeTest({
     grew: true,
     shrank: true,
     logProgressOverIpc: true,
-    skippedStepCatchUp: true,
+    strictRouteProgress: true,
+    detourPreservesGuide: true,
+    detourWarning: true,
+    townReturnRecovery: true,
+    warningSurvivesModeChange: true,
     logTrackingMenu: true,
     explicitGuideSync: true,
     configurableShortcut: true,

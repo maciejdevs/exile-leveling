@@ -3,6 +3,7 @@ import { Loading } from "../components/Loading";
 import { useAutoProgress } from "../components/AutoProgress";
 import { Navbar } from "../components/Navbar";
 import { OverlayControls } from "../components/OverlayControls";
+import { RouteWarning } from "../components/RouteWarning";
 import { pipe } from "../utility";
 import { withBlank } from "../utility/withBlank";
 import { withScrollRestoration } from "../utility/withScrollRestoration";
@@ -27,6 +28,9 @@ export function App() {
   return (
     <>
       <OverlayControls />
+      <Suspense fallback={null}>
+        <RouteWarning />
+      </Suspense>
       <div id="app-scroll" className="app-scroll">
         <Navbar />
         <Suspense fallback={<Loading />}>

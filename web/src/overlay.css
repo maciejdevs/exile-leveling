@@ -36,6 +36,23 @@ body,
   padding-bottom: var(--size-2);
 }
 
+.route-detour-border {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  border: 2px solid #ef4444;
+  pointer-events: none;
+}
+
+.route-detour-message {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .overlay-toolbar {
   position: fixed;
   inset: 0 0 auto;

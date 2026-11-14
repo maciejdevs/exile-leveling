@@ -40,9 +40,15 @@ npm.cmd start -- --log-path "D:\Games\Path of Exile\logs\LatestClient.txt"
 ```
 
 `POE_LOG_PATH` is also supported. A green dot in the title bar confirms that the
-log is being read; hover over it to see the path. Auto-progress follows the expected
-area and catches up to an unambiguous later visit when optional steps were skipped.
-It will not guess between repeated visits or move backwards automatically.
+log is being read; hover over it to see the path. Auto-progress advances exactly
+one zone only when the entered area matches the next expected area in the route.
+It never jumps ahead or moves backwards automatically.
+
+Entering an unexpected zone, including an unplanned town visit, leaves the guide
+in place and shows a static red border. Returning to the current route zone clears
+the border without advancing; entering the awaited next zone clears it and advances.
+The border also works in minimal mode and never intercepts clicks. It does not
+appear from old log history at startup, and stops after the route's final zone.
 
 Open **Menu → Log tracking** to see the selected file, file-update time, latest
 detected area, new area-event count, and the guide's current/next areas. Detection
@@ -53,6 +59,7 @@ the log folder. A selected file is remembered. The system tray has these control
 If tracking works but the guide is at a different point, use **Sync guide to this
 area** on that page. Select the correct visit explicitly for repeated areas.
 Existing history is shown for diagnosis, not replayed into progress automatically.
+Previously saved positions are preserved: correct any earlier mistaken jump manually.
 
 ## Commands
 

@@ -1,10 +1,10 @@
 export interface AreaProgress {
   index: number;
-  reason: "advanced" | "current" | "ambiguous" | "earlier" | "off-route";
+  reason: "advanced" | "current" | "unexpected";
 }
 
-// Follow the expected transition first. A unique later visit can recover from
-// skipped optional steps, but repeated visits (especially towns) need a choice.
+// Anchor progress to the guide, not to the last physical area visited. Detours
+// never skip route visits, even if the destination appears only once later on.
 export function resolveAreaProgress(
   edges: string[],
   current: number,
@@ -13,13 +13,21 @@ export function resolveAreaProgress(
   if (edges[current + 1] === area)
     return { index: current + 1, reason: "advanced" };
   if (edges[current] === area) return { index: current, reason: "current" };
-  const later = edges
-    .map((id, index) => (id === area && index > current ? index : -1))
-    .filter((index) => index >= 0);
-  if (later.length === 1) return { index: later[0], reason: "advanced" };
-  if (later.length > 1) return { index: current, reason: "ambiguous" };
-  return {
-    index: current,
-    reason: edges.includes(area) ? "earlier" : "off-route",
-  };
+  return { index: current, reason: "unexpected" };
+}
+
+export function routeDeviation(
+  edges: string[],
+  current: number,
+  detectedAreaId: string | null,
+) {
+  const expectedAreaId = edges[current + 1];
+  if (
+    detectedAreaId === null ||
+    expectedAreaId === undefined ||
+    detectedAreaId === edges[current] ||
+    detectedAreaId === expectedAreaId
+  )
+    return null;
+  return { detectedAreaId, expectedAreaId };
 }

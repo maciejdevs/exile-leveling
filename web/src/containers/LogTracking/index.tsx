@@ -56,17 +56,12 @@ export default function LogTracking() {
   else if (progress?.reason === "current")
     explanation = "The guide matches the latest area detected in the log.";
   else if (progress?.reason === "advanced")
+    explanation = `The latest logged area is the expected next zone: ${name(route.edges[current + 1])}. New entries advance the guide; use Sync below if you are already there.`;
+  else if (progress?.reason === "unexpected")
     explanation =
-      "The detected area is ahead of the guide. Sync below if you started mid-campaign. New transitions catch up automatically when the route visit is unambiguous.";
-  else if (progress?.reason === "ambiguous")
-    explanation =
-      "This area has multiple later visits in the route. Choose the correct visit below so the guide does not jump to the wrong point.";
-  else if (progress?.reason === "earlier")
-    explanation =
-      "The latest detected area is earlier than the guide. Choose its visit below if you want to move the guide back.";
-  else if (progress?.reason === "off-route")
-    explanation =
-      "The detected area is not in the selected route. Tracking can work without advancing the guide for an off-route area.";
+      route.edges[current + 1] === undefined
+        ? "The guide has reached its final zone. Automatic progression is complete. You can still synchronize manually."
+        : `Detected ${name(log.lastAreaId)}; the guide is waiting for ${name(route.edges[current + 1])}. Progress stays unchanged during detours, including town visits. Return to ${name(route.edges[current])} to clear the warning, or enter the expected next zone to continue. Only synchronize below if you deliberately want to change your route position.`;
 
   async function run(action: () => Promise<LogStatus | void>) {
     setBusy(true);

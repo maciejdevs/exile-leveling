@@ -85,8 +85,13 @@ Manually hiding the overlay never causes it to appear over another application.
 
 The Log tracking page compares the latest sanitized area in the file with the
 guide's current/next areas. Historical entries are diagnostics only. New area
-events follow the expected edge or a unique later visit; repeated later visits
-require an explicit choice. This recovery policy lives in the renderer's tested
+events advance exactly one edge only for the awaited next area ID. All other
+destinations leave the cursor/highlights/scroll unchanged. A session-only observed
+area and a derived deviation atom drive a noninteractive red border, including for
+unplanned town visits. Returning to the current area or entering the next expected
+area clears it; manual synchronization also clears a resolved mismatch. Focus and
+click-through changes do not reset it. No warning is inferred from old startup
+history or after the final zone. The policy lives in the renderer's tested
 `utility/area-progress.ts`, leaving upstream `common/` logic unchanged.
 
 ## Validation

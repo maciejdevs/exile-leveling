@@ -7,7 +7,7 @@ import type { RouteData } from "common";
 import { persistentAtom, transientAtomFamily } from ".";
 import { RESET } from "jotai/utils";
 import { atomEffect, observe } from "jotai-effect";
-import { resolveAreaProgress } from "../utility/area-progress";
+import { resolveAreaProgress, routeDeviation } from "../utility/area-progress";
 import { scrollToRouteEntry } from "../utility/route-scroll";
 
 const baseRouteSelector = atom(async (get) => {
@@ -113,6 +113,8 @@ export const routeSelector = atom(async (get) => {
 
 const ACTIVE_EDGE_VERSION = 0;
 const activeEdgeIndex = persistentAtom("active-edge", [0], ACTIVE_EDGE_VERSION);
+// Session-only: historical log snapshots must not create a startup warning.
+const lastObservedAreaAtom = atom<string | null>(null);
 
 export function edgeId(edgeIndex: number) {
   return `edge-${edgeIndex}`;
@@ -130,12 +132,13 @@ export const activeEdgeAtom = atom(
     const currentEdgeIndex = get(activeEdgeAtom)[0];
 
     let messageAreaId = null;
-    const matches = /Generating level \d+ area "(.*?)"/.exec(value);
+    const matches = /Generating level \d+ area "([^"\r\n]+)"/.exec(value);
     if (matches !== null) {
       messageAreaId = matches[1];
     }
 
     if (messageAreaId !== null) {
+      set(lastObservedAreaAtom, messageAreaId);
       const result = resolveAreaProgress(
         edges,
         currentEdgeIndex,
@@ -145,6 +148,15 @@ export const activeEdgeAtom = atom(
     }
   },
 );
+
+// Deriving this from the cursor also clears a resolved warning after an explicit
+// manual selection/sync, without coupling desktop focus or lock state to it.
+export const routeDeviationAtom = atom(async (get) => {
+  const detected = get(lastObservedAreaAtom);
+  if (detected === null) return null;
+  const edges = (await get(routeSelector)).edges;
+  return routeDeviation(edges, get(activeEdgeAtom)[0], detected);
+});
 
 export const nextEdgeAtom = transientAtomFamily((param: number | null) => {
   if (param === null) return atom(null, () => {});
